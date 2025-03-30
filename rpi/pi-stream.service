@@ -1,0 +1,12 @@
+[Unit]
+Description=Raspberry Pi Camera Streaming Service
+After=network.target
+
+[Service]
+ExecStart=/bin/bash /home/ticha/Projects/ZelvakCam/rpi/stream.sh
+WorkingDirectory=/home/ticha/Projects/ZelvakCam/rpi
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
