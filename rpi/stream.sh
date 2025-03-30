@@ -2,6 +2,5 @@
 
 URL="rtmp://134.122.67.47/live/stream"
 
-rpicam-vid -t 0 --inline --framerate 30 --width 1280 --height 720 --codec h264 \
---profile high --level 4.2 --bitrate 3500000 -o - | \
-ffmpeg -re -f h264 -i - -c:v copy -f flv $URL
+rpicam-vid -t 0 --inline --width 1640 --height 1232 --framerate 40 --bitrate 6000000 -o - | \
+ffmpeg -re -i - -c:v copy -f flv $URL
