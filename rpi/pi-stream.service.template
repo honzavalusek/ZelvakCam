@@ -1,0 +1,14 @@
+[Unit]
+Description=Raspberry Pi Camera Streaming Service
+After=network.target
+
+[Service]
+ExecStart=/bin/bash __INSTALL_DIR__/stream.sh
+WorkingDirectory=__INSTALL_DIR__
+Restart=always
+User=zelvakcam
+Group=video
+EnvironmentFile=-/etc/zelvakcam.conf
+
+[Install]
+WantedBy=multi-user.target

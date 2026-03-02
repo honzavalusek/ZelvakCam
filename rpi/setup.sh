@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
 # Create zelvakcam user if it doesn't exist
 if ! id -u zelvakcam &>/dev/null; then
     sudo useradd -r -s /usr/sbin/nologin -G video zelvakcam
@@ -14,10 +16,10 @@ if [ ! -f /etc/zelvakcam.conf ]; then
 fi
 
 # Make scripts executable
-chmod +x stream.sh
+chmod +x "$SCRIPT_DIR/stream.sh"
 
-# Copy service file to systemd directory
-sudo cp pi-stream.service /etc/systemd/system/
+# Generate service file from template with correct paths
+sed "s|__INSTALL_DIR__|${SCRIPT_DIR}|g" "$SCRIPT_DIR/pi-stream.service.template" | sudo tee /etc/systemd/system/pi-stream.service > /dev/null
 
 # Reload systemd daemon
 sudo systemctl daemon-reload
