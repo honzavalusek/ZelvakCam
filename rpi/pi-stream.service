@@ -6,7 +6,9 @@ After=network.target
 ExecStart=/bin/bash /home/ticha/Projects/ZelvakCam/rpi/stream.sh
 WorkingDirectory=/home/ticha/Projects/ZelvakCam/rpi
 Restart=always
-User=root
+User=zelvakcam
+Group=video
+EnvironmentFile=-/etc/zelvakcam.conf
 
 [Install]
 WantedBy=multi-user.target

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/janvalusek/Projects/ZelvakCam log --oneline -20)"
+    ]
+  }
+}

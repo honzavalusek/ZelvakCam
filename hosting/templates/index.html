@@ -2,19 +2,9 @@
 
 {% block title %}Live Stream{% endblock %}
 
-{% block head %}
-<style>
-    #video {
-        width: 100%;
-        height: auto;
-        max-height: 80vh;
-        display: block;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="video-container">
+    <span id="streamStatus" class="stream-status offline">Connecting...</span>
     <video id="video" controls autoplay></video>
 </div>
 {% endblock %}
@@ -22,23 +12,50 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
-    const videoSource = 'http://134.122.67.47:8081/hls/stream.m3u8';
+    const videoSource = '{{ url_for("hls", filename="stream.m3u8") }}';
+    const statusEl = document.getElementById('streamStatus');
+
+    function setStatus(online) {
+        if (online) {
+            statusEl.textContent = 'Live';
+            statusEl.className = 'stream-status live';
+        } else {
+            statusEl.textContent = 'Camera offline';
+            statusEl.className = 'stream-status offline';
+        }
+    }
 
     if (Hls.isSupported()) {
         var video = document.getElementById('video');
         var hls = new Hls();
         hls.loadSource(videoSource);
         hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED,function() {
+
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
             video.play();
+            setStatus(true);
+        });
+
+        hls.on(Hls.Events.ERROR, function (event, data) {
+            if (data.fatal) {
+                setStatus(false);
+                if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                    setTimeout(function () { hls.startLoad(); }, 5000);
+                }
+            }
         });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        var video = document.getElementById('video');
         video.src = videoSource;
-        video.addEventListener('loadedmetadata',function() {
+        video.addEventListener('loadedmetadata', function () {
             video.play();
+            setStatus(true);
+        });
+        video.addEventListener('error', function () {
+            setStatus(false);
         });
     } else {
-        alert('Your browser does not support HLS streaming.');
+        statusEl.textContent = 'Browser not supported';
     }
 </script>
 {% endblock %}

@@ -1,4 +1,17 @@
 #!/bin/bash
+set -euo pipefail
+
+# Create zelvakcam user if it doesn't exist
+if ! id -u zelvakcam &>/dev/null; then
+    sudo useradd -r -s /usr/sbin/nologin -G video zelvakcam
+    echo "Created zelvakcam user."
+fi
+
+# Create default config file if it doesn't exist
+if [ ! -f /etc/zelvakcam.conf ]; then
+    echo 'RTMP_URL=rtmp://134.122.67.47/live/stream' | sudo tee /etc/zelvakcam.conf > /dev/null
+    echo "Created /etc/zelvakcam.conf — edit it to change the RTMP URL."
+fi
 
 # Make scripts executable
 chmod +x stream.sh
