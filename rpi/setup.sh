@@ -15,6 +15,13 @@ if [ ! -f /etc/zelvakcam.conf ]; then
     echo "Created /etc/zelvakcam.conf — edit it to change the RTMP URL."
 fi
 
+# Ensure zelvakcam user can traverse the directory path
+CURRENT="$SCRIPT_DIR"
+while [ "$CURRENT" != "/" ]; do
+    sudo chmod o+x "$CURRENT"
+    CURRENT="$(dirname "$CURRENT")"
+done
+
 # Make scripts executable
 chmod +x "$SCRIPT_DIR/stream.sh"
 

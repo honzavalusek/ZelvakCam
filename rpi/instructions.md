@@ -5,7 +5,9 @@
 1. Run `chmod +x setup.sh`
 2. Run `sudo ./setup.sh` to:
    - Create the `zelvakcam` system user (with `video` group for camera access)
+   - Grant the `zelvakcam` user traverse (`o+x`) permission on the project directory path
    - Create `/etc/zelvakcam.conf` with the default RTMP URL
+   - Generate the systemd service file with correct paths
    - Install and start the streaming service
 
 ## Configuration
