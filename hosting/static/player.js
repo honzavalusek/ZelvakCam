@@ -36,8 +36,13 @@
         pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
         const mine = pc;
         pc.addTransceiver('video', { direction: 'recvonly' });
-        pc.addTransceiver('audio', { direction: 'recvonly' });
-        pc.ontrack = (e) => { video.srcObject = e.streams[0]; };
+        // MediaMTX's answer carries no stream id, so e.streams is empty: build our own.
+        const stream = new MediaStream();
+        pc.ontrack = (e) => {
+            stream.addTrack(e.track);
+            if (video.srcObject !== stream) video.srcObject = stream;
+            video.play().catch(() => {});
+        };
         pc.onconnectionstatechange = () => {
             if (mine !== pc) return;
             if (pc.connectionState === 'connected') { failures = 0; setStatus(true); video.play().catch(() => {}); }
