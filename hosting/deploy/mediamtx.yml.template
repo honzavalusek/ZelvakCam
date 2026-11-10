@@ -1,0 +1,43 @@
+logLevel: info
+
+# Only RTMP ingest is public; everything else is localhost behind Caddy.
+rtmp: yes
+rtmpAddress: :1935
+rtmps: no
+rtsp: no
+srt: no
+api: no
+metrics: no
+pprof: no
+playback: no
+
+webrtc: yes
+webrtcAddress: 127.0.0.1:8889
+webrtcLocalUDPAddress: :8189
+webrtcLocalTCPAddress: :8189
+webrtcAdditionalHosts: [${SERVER_IP}]
+
+hls: yes
+hlsAddress: 127.0.0.1:8888
+hlsVariant: lowLatency
+hlsAlwaysRemux: no
+
+authMethod: internal
+authInternalUsers:
+  # The Pi publishes with user pi / PUBLISH_KEY
+  - user: pi
+    pass: ${PUBLISH_KEY}
+    ips: []
+    permissions:
+      - action: publish
+        path: cam
+  # Reading is only possible from localhost (i.e. through Caddy after login)
+  - user: any
+    pass:
+    ips: ['127.0.0.1', '::1']
+    permissions:
+      - action: read
+        path: cam
+
+paths:
+  cam:

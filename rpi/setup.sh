@@ -1,40 +1,28 @@
 #!/bin/bash
+# Run on the Raspberry Pi: sudo ./setup.sh
 set -euo pipefail
+[ "$(id -u)" -eq 0 ] || { echo "Run with sudo"; exit 1; }
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Create zelvakcam user if it doesn't exist
-if ! id -u zelvakcam &>/dev/null; then
-    sudo useradd -r -s /usr/sbin/nologin -G video zelvakcam
-    echo "Created zelvakcam user."
-fi
+command -v ffmpeg >/dev/null || { apt-get update; apt-get install -y ffmpeg; }
+command -v rpicam-vid >/dev/null || { echo "rpicam-vid not found (install rpicam-apps)"; exit 1; }
 
-# Create default config file if it doesn't exist
+id -u zelvakcam &>/dev/null || useradd -r -s /usr/sbin/nologin -G video zelvakcam
+
+install -m 755 "$DIR/stream.sh" /usr/local/bin/zelvakcam-stream
+install -m 644 "$DIR/pi-stream.service" /etc/systemd/system/pi-stream.service
+
 if [ ! -f /etc/zelvakcam.conf ]; then
-    echo 'RTMP_URL=rtmp://134.122.67.47/live/stream' | sudo tee /etc/zelvakcam.conf > /dev/null
-    echo "Created /etc/zelvakcam.conf — edit it to change the RTMP URL."
+    install -m 640 -o root -g zelvakcam "$DIR/zelvakcam.conf.example" /etc/zelvakcam.conf
+    read -rp "RTMP URL (printed by hosting/setup.sh): " URL
+    if [ -n "$URL" ]; then
+        { printf "RTMP_URL='%s'\n" "$URL"; grep -v '^RTMP_URL=' /etc/zelvakcam.conf; } > /etc/zelvakcam.conf.new
+        install -m 640 -o root -g zelvakcam /etc/zelvakcam.conf.new /etc/zelvakcam.conf && rm /etc/zelvakcam.conf.new
+    fi
 fi
 
-# Ensure zelvakcam user can traverse the directory path
-CURRENT="$SCRIPT_DIR"
-while [ "$CURRENT" != "/" ]; do
-    sudo chmod o+x "$CURRENT"
-    CURRENT="$(dirname "$CURRENT")"
-done
-
-# Make scripts executable
-chmod +x "$SCRIPT_DIR/stream.sh"
-
-# Generate service file from template with correct paths
-sed "s|__INSTALL_DIR__|${SCRIPT_DIR}|g" "$SCRIPT_DIR/pi-stream.service.template" | sudo tee /etc/systemd/system/pi-stream.service > /dev/null
-
-# Reload systemd daemon
-sudo systemctl daemon-reload
-
-# Enable service to start at boot
-sudo systemctl enable pi-stream.service
-
-# Start the service
-sudo systemctl start pi-stream.service
-
-echo "ZelvakCam streaming service has been set up and started."
+systemctl daemon-reload
+systemctl enable pi-stream.service
+systemctl restart pi-stream.service
+echo "Done. Logs: journalctl -u pi-stream -f"

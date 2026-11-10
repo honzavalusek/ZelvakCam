@@ -1,12 +1,20 @@
 #!/bin/bash
+# Streams the Pi camera as H.264 (no re-encode) to the RTMP server.
 set -euo pipefail
 
-# Load config from environment or config file
-if [ -f /etc/zelvakcam.conf ]; then
-    source /etc/zelvakcam.conf
-fi
+[ -f /etc/zelvakcam.conf ] && source /etc/zelvakcam.conf
 
-URL="${RTMP_URL:-rtmp://134.122.67.47/live/stream}"
+: "${RTMP_URL:?Set RTMP_URL in /etc/zelvakcam.conf}"
+WIDTH="${WIDTH:-1280}"
+HEIGHT="${HEIGHT:-720}"
+FPS="${FPS:-30}"
+BITRATE="${BITRATE:-2500000}"
 
-rpicam-vid -t 0 --inline --width 1640 --height 1232 --framerate 30 --bitrate 6000000 -o - | \
-ffmpeg -re -i - -c:v copy -f flv "$URL"
+# Baseline profile + 1s keyframe interval: browser-friendly (WebRTC) and fast to join.
+rpicam-vid -t 0 -n --inline --codec h264 --profile baseline --level 4.1 \
+    --intra "$FPS" --width "$WIDTH" --height "$HEIGHT" \
+    --framerate "$FPS" --bitrate "$BITRATE" -o - \
+  | ffmpeg -hide_banner -loglevel warning \
+      -fflags +genpts -use_wallclock_as_timestamps 1 \
+      -f h264 -framerate "$FPS" -i - \
+      -c:v copy -f flv "$RTMP_URL"

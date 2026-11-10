@@ -1,14 +1,15 @@
 [Unit]
 Description=Raspberry Pi Camera Streaming Service
-After=network.target
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=0
 
 [Service]
-ExecStart=/bin/bash /home/ticha/Projects/ZelvakCam/rpi/stream.sh
-WorkingDirectory=/home/ticha/Projects/ZelvakCam/rpi
-Restart=always
+ExecStart=/usr/local/bin/zelvakcam-stream
 User=zelvakcam
 Group=video
-EnvironmentFile=-/etc/zelvakcam.conf
+Restart=always
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target

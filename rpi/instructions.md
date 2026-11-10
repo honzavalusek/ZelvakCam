@@ -1,29 +1,23 @@
-# ZelvakCam RPi Setup Instructions
+# ZelvakCam RPi Setup
 
-## Setup
+1. Run `hosting/setup.sh` on the server first; it prints the `RTMP_URL`.
+2. On the Pi: `sudo ./setup.sh` and paste the URL when asked.
 
-1. Run `chmod +x setup.sh`
-2. Run `sudo ./setup.sh` to:
-   - Create the `zelvakcam` system user (with `video` group for camera access)
-   - Grant the `zelvakcam` user traverse (`o+x`) permission on the project directory path
-   - Create `/etc/zelvakcam.conf` with the default RTMP URL
-   - Generate the systemd service file with correct paths
-   - Install and start the streaming service
+This installs `/usr/local/bin/zelvakcam-stream`, the `pi-stream` systemd unit and `/etc/zelvakcam.conf`.
 
-## Configuration
+## Configuration (`/etc/zelvakcam.conf`)
 
-The RTMP target URL is configured in `/etc/zelvakcam.conf`:
+| Variable | Default | Notes |
+|---|---|---|
+| `RTMP_URL` | – | `rtmp://SERVER_IP/cam?user=pi&pass=PUBLISH_KEY` |
+| `WIDTH` / `HEIGHT` | 1280 / 720 | |
+| `FPS` | 30 | also sets keyframe interval (1 s) |
+| `BITRATE` | 2500000 | bits/s |
 
-```
-RTMP_URL=rtmp://134.122.67.47/live/stream
-```
+Restart after editing: `sudo systemctl restart pi-stream`.
 
-Edit this file to change the server address, then restart the service.
+## Management
 
-## Service Management
-
-- Check status: `sudo systemctl status pi-stream.service`
-- Stop streaming: `sudo systemctl stop pi-stream.service`
-- Start streaming: `sudo systemctl start pi-stream.service`
-- Restart: `sudo systemctl restart pi-stream.service`
-- Disable autostart: `sudo systemctl disable pi-stream.service`
+- Status: `systemctl status pi-stream`
+- Logs: `journalctl -u pi-stream -f`
+- The service retries every 5 s forever, so it recovers when the server comes back.

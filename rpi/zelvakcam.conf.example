@@ -1,0 +1,6 @@
+# Copy to /etc/zelvakcam.conf (setup.sh does this for you)
+RTMP_URL='rtmp://SERVER_IP/cam?user=pi&pass=PUBLISH_KEY'
+WIDTH=1280
+HEIGHT=720
+FPS=30
+BITRATE=2500000
