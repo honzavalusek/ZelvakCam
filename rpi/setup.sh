@@ -14,11 +14,11 @@ install -m 755 "$DIR/stream.sh" /usr/local/bin/zelvakcam-stream
 install -m 644 "$DIR/pi-stream.service" /etc/systemd/system/pi-stream.service
 
 if [ ! -f /etc/zelvakcam.conf ]; then
-    install -m 640 -o root -g zelvakcam "$DIR/zelvakcam.conf.example" /etc/zelvakcam.conf
+    install -m 640 -o root -g video "$DIR/zelvakcam.conf.example" /etc/zelvakcam.conf
     read -rp "RTMP URL (printed by hosting/setup.sh): " URL
     if [ -n "$URL" ]; then
         { printf "RTMP_URL='%s'\n" "$URL"; grep -v '^RTMP_URL=' /etc/zelvakcam.conf; } > /etc/zelvakcam.conf.new
-        install -m 640 -o root -g zelvakcam /etc/zelvakcam.conf.new /etc/zelvakcam.conf && rm /etc/zelvakcam.conf.new
+        install -m 640 -o root -g video /etc/zelvakcam.conf.new /etc/zelvakcam.conf && rm /etc/zelvakcam.conf.new
     fi
 fi
 
