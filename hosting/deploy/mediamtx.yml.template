@@ -3,7 +3,7 @@ logLevel: info
 # Only RTMP ingest is public; everything else is localhost behind Caddy.
 rtmp: yes
 rtmpAddress: :1935
-rtmps: no
+rtmpEncryption: "no"
 rtsp: no
 srt: no
 api: no
