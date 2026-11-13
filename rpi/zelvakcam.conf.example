@@ -1,6 +1,8 @@
 # Copy to /etc/zelvakcam.conf (setup.sh does this for you)
 RTMP_URL='rtmp://SERVER_IP/cam?user=pi&pass=PUBLISH_KEY'
-WIDTH=1280
-HEIGHT=720
+WIDTH=1920
+HEIGHT=1080
 FPS=30
-BITRATE=2500000
+BITRATE=5000000
+# Use the full sensor field of view (IMX219); without it 1080p is a zoomed-in crop
+EXTRA_ARGS="--mode 1640:1232"
